@@ -124,7 +124,6 @@ trait FlashcardUtilities
     {
         $this->resetProps();
 
-        // while (true) {
         $choice = $this->choice($this->flashcardConfig['prompts']['select_option'], $this->flashcardConfig['menu']);
 
         switch ($choice) {
@@ -158,7 +157,6 @@ trait FlashcardUtilities
             default:
                 $this->error('Invalid choice. Please try again.');
         }
-        // }
 
         return 0;
     }
