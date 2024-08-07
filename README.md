@@ -49,6 +49,7 @@ Cheers!
  <img src="resources/images/list.png">
  <img src="resources/images/update.png">
  <img src="resources/images/practice.png">
+ <img src="resources/images/test.png">
  
 ## TESTING
 ```
