@@ -54,7 +54,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - ${TEST_DB_HOST_PORT}:3307
+      - ${TEST_DB_HOST_PORT}:3306
     environment:
       MYSQL_DATABASE: ${TEST_DB_DATABASE}
       MYSQL_PASSWORD: ${TEST_DB_PASSWORD}
