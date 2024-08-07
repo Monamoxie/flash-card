@@ -200,8 +200,7 @@ class FlashcardCommandTest extends TestCase
             $this->flashcardConfig['prompts']['select_option'],
             FlashcardActionEnum::LIST->value,
             $this->flashcardConfig['menu']
-        )
-            ->expectsOutput($this->flashcardConfig['messages']['no_flashcards']);
+        )->expectsOutput($this->flashcardConfig['messages']['no_flashcards']);
 
 
         $interaction->expectsChoice(

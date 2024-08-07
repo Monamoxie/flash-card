@@ -111,6 +111,8 @@ trait FlashcardUtilities
         try {
             $this->flashcardService::newEntry($question, $answer, $this->user);
             $this->alert($this->flashcardConfig['messages']['new_entry_created']);
+
+            return $this->displayMenu();
         } catch (\Throwable $th) {
             $this->error($this->flashcardConfig['messages']['entry_could_not_be_processed']);
             return 0;
@@ -121,45 +123,42 @@ trait FlashcardUtilities
     {
         $this->resetProps();
 
-        while (true) {
-            $choice = $this->choice($this->flashcardConfig['prompts']['select_option'], $this->flashcardConfig['menu']);
+        // while (true) {
+        $choice = $this->choice($this->flashcardConfig['prompts']['select_option'], $this->flashcardConfig['menu']);
 
-            switch ($choice) {
-                case FlashcardActionEnum::LIST->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::LIST->name));
-                    $this->listFlashcards();
-                    break;
-                case FlashcardActionEnum::CREATE->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::CREATE->name));
-                    $this->createFlashcard();
-                    break;
-                case FlashcardActionEnum::UPDATE->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::UPDATE->name));
-                    $this->updateFlashcard();
-                    break;
-                case FlashcardActionEnum::DELETE->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::DELETE->name));
-                    $this->deleteFlashcard();
-                    break;
-                case FlashcardActionEnum::PRACTICE->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::PRACTICE->name));
-                    $this->practiceMode();
-                    break;
-                case FlashcardActionEnum::STATISTICS->value:
-                    $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::STATISTICS->name));
-                    return $this->statistics();
-                    break;
-                case FlashcardActionEnum::RESET->value:
-                    $this->reset();
-                    break;
-                case FlashcardActionEnum::EXIT->value:
-                    $this->exit();
-                    $this->info('Goodbye. See you soon!');
-                    return 0;
-                default:
-                    $this->error('Invalid choice. Please try again.');
-            }
+        switch ($choice) {
+            case FlashcardActionEnum::LIST->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::LIST->name));
+                return $this->listFlashcards();
+            case FlashcardActionEnum::CREATE->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::CREATE->name));
+                return $this->createFlashcard();
+            case FlashcardActionEnum::UPDATE->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::UPDATE->name));
+                return $this->updateFlashcard();
+            case FlashcardActionEnum::DELETE->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::DELETE->name));
+                $this->deleteFlashcard();
+                break;
+            case FlashcardActionEnum::PRACTICE->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::PRACTICE->name));
+                $this->practiceMode();
+                break;
+            case FlashcardActionEnum::STATISTICS->value:
+                $this->alert(sprintf('Entering %s Mode', FlashcardActionEnum::STATISTICS->name));
+                return $this->statistics();
+                break;
+            case FlashcardActionEnum::RESET->value:
+                $this->reset();
+                break;
+            case FlashcardActionEnum::EXIT->value:
+                $this->exit();
+                $this->info('Goodbye. See you soon!');
+                return 0;
+            default:
+                $this->error('Invalid choice. Please try again.');
         }
+        // }
 
         return 0;
     }
@@ -272,8 +271,8 @@ trait FlashcardUtilities
                 $this->currPage += 1;
                 $this->listFlashcards();
                 break;
-            case FlashcardPaginationEnum::NEXT->value:
-                $this->displayMenu();
+            case FlashcardPaginationEnum::RETURN->value:
+                return $this->displayMenu();
                 break;
             default:
                 $this->error($this->flashcardConfig['messages']['invalid_option']);
@@ -306,6 +305,11 @@ trait FlashcardUtilities
         $this->listFlashcards(false);
 
         $rowToUpdate = $this->getRowFromTable(FlashcardActionEnum::UPDATE->value);
+        if (!$rowToUpdate['is_row']) {
+            return $this->triggerGenericPagination($rowToUpdate['input'], FlashcardActionEnum::UPDATE->value);
+        }
+
+        $rowToUpdate = $rowToUpdate['row'];
 
         $this->alert('Existing Question => ' . $rowToUpdate->question);
         $newQuestion = $this->ask('Please enter the new question. Press Enter if you wish to leave it unchanged!');
@@ -320,10 +324,10 @@ trait FlashcardUtilities
 
         $this->alert('Flashcard has been successfully updated. Kindly continue from where you left off');
 
-        $this->updateFlashcard();
+        return $this->updateFlashcard();
     }
 
-    private function handleGenericInput(string $input, string $type)
+    private function triggerGenericPagination(string $input, string $type)
     {
         switch (strtolower($input)) {
             case 'r':
@@ -336,40 +340,32 @@ trait FlashcardUtilities
                 $this->currPage -= 1;
                 break;
             default:
-                // ::: If the value of input is none of the above case scenarios, 
-                // ::: Then I will return the value, cast it into an integer and check if it is valid
-                return $input;
+                $this->error($this->flashcardConfig['messages']['invalid_option']);
+                $this->exit();
                 break;
         }
 
         // ::: Reload the flashcard based on the selected type
-        switch (strtolower($type)) {
+        switch ($type) {
             case FlashcardActionEnum::UPDATE->value:
-                $this->updateFlashcard();
-                break;
+                return $this->updateFlashcard();
             case FlashcardActionEnum::DELETE->value:
-                $this->deleteFlashcard();
-                break;
+                return $this->deleteFlashcard();
             case FlashcardActionEnum::PRACTICE->value:
-                $this->practiceMode();
-                break;
+                return $this->practiceMode();
             default:
-                break;
+                return 0;
         }
-        return;
     }
 
-    private function getRowFromTable(string $intendedAction)
+    private function getRowFromTable(string $intendedAction): array
     {
         $isValidRowID = false;
         $rowToAction = null;
         while (!$isValidRowID) {
-            $prompt = $this->ask($this->getGenericPagination($intendedAction));
-            $input = $this->handleGenericInput($prompt, $intendedAction);
+            $input = $this->ask($this->getGenericPagination($intendedAction));
 
-            if (!is_numeric($input)) {
-                $this->error($this->flashcardConfig['messages']['invalid_option']);
-            } else {
+            if (is_numeric($input)) {
                 $rowToAction = $this->flashcards->filter(function ($row) use ($input) {
                     return $row->table_id == (int) $input;
                 })->first();
@@ -380,10 +376,12 @@ trait FlashcardUtilities
                 } else {
                     $isValidRowID = true;
                 }
+            } else {
+                return ['is_row' => false, 'input' => $input];
             }
         }
 
-        return $rowToAction;
+        return ['is_row' => true, 'row' => $rowToAction];
     }
 
     private function deleteFlashcard()
@@ -391,6 +389,11 @@ trait FlashcardUtilities
         $this->listFlashcards(indexing: false);
 
         $rowToDelete = $this->getRowFromTable(FlashcardActionEnum::DELETE->value);
+        if (!$rowToDelete['is_row']) {
+            return $this->triggerGenericPagination($rowToDelete['input'], FlashcardActionEnum::DELETE->value);
+        }
+
+        $rowToDelete = $rowToDelete['row'];
 
         // delete entry from DB
         $this->flashcardService::deleteEntry($rowToDelete->id, $this->user);
@@ -422,6 +425,11 @@ trait FlashcardUtilities
 
         while (True) {
             $rowToPractice = $this->getRowFromTable(FlashcardActionEnum::PRACTICE->value);
+            if (!$rowToPractice['is_row']) {
+                return $this->triggerGenericPagination($rowToPractice['input'], FlashcardActionEnum::PRACTICE->value);
+            }
+
+            $rowToPractice = $rowToPractice['row'];
 
             if ($rowToPractice->status === FlashcardStatusEnum::CORRECT->value) {
                 $this->error('The question you picked has already been correctly answered. Please pick something else');
