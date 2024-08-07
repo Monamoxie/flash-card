@@ -91,9 +91,9 @@ class FlashcardService
             ->first();
 
         return [
-            'total_questions' => $result->total_questions,
-            'total_completed' => $result->total_completed,
-            'total_correct' => $result->total_correct,
+            'total_questions' => $result->total_questions ?? 0,
+            'total_completed' => $result->total_completed ?? 0,
+            'total_correct' => $result->total_correct ?? 0,
             'percentage_completed' => !empty($result->percentage_completed) ? round($result->percentage_completed, 2) : 0,
             'percentage_correct' => !empty($result->percentage_correct) ? round($result->percentage_correct, 2) : 0,
         ];
