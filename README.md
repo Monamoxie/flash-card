@@ -56,5 +56,5 @@ Cheers!
 php artisan test
 ```
 
- 
- 
+## LICENSE
+[MIT license](https://opensource.org/licenses/MIT)
