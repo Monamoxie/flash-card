@@ -32,17 +32,11 @@ A powerful CLI program for managing your flashcards. It gives you the ability to
 
 ## BONUS ADDITIONS
 ### MYSQL 
-I opted for MySQL instead of the the default SQLite installation. Makes this powerful and production ready, if necessary. 
+A MySQL DB instead of the the default SQLite installation provided by Laravel out of the box. Makes this powerful and production ready, if necessary. 
 ### DEDICATED TEST DB 
-- For Feature/Unit testing, I'm also using a dedicated MySQL container instead of the traditional in-memory or SQLite DB. It's good to use the same testing engine for both your production and test DB. It encourages consistency.
-### UPDATE FLASHCARD 
-- Although it was not specified in the instructions, I included the ability to UPDATE FLASHCARDS. I think it's necessary. 
+- For Feature/Unit testing, a dedicated MySQL container instead of the traditional in-memory or SQLite DB. It's good to use the same testing engine for both your production and test DB. It encourages consistency.
 ### PAGINATION
-- I added the ability to paginate the results. This will be fully embraced by users with hundreds or thousands of flashcards, it gives them the ability to navigate the program. Both during listing, update, create or delete actions. 
-
-There were more things I could have done, but time was not on my side. 
-
-Cheers!
+- Ability to paginate the results. This will be fully embraced by users with hundreds or thousands of flashcards, it gives the ability to navigate the program, either during listing, update, create or delete actions. 
 
 <p align="center">
 <img src="resources/images/statistics1.png">
