@@ -41,6 +41,7 @@ return [
         'enter_name' => 'Enter your name',
         'enter_new_question'  => 'Enter a new question',
         'enter_answer_for_new_question' => 'Enter the answer for the provided question',
+        'confirm_reset_status' => 'Are you sure you wish to reset yoour progress levels?',
     ],
     'messages' => [
         'welcome' => 'Welcome to Flashcard!',
@@ -57,6 +58,8 @@ return [
         'entry_could_not_be_processed' => 'Your entry could not be processed at this moment. Please try again later',
         'new_entry_created' => 'Your question has been successfully created!',
         'invalid_option' => 'Invalid option. Please try again',
-        'no_flashcards' => 'No flashcards found!'
+        'no_flashcards' => 'No flashcards found!',
+        'flashcards_reset' => 'Reset was successful!',
+        'levels_intact' => 'Your levels are intact. No changes made',
     ],
 ];

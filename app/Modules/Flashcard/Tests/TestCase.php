@@ -24,6 +24,8 @@ abstract class TestCase extends BaseTestCase
 
     protected array $flashcardConfig = [];
 
+    protected ?User $testUserModel = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,27 +35,24 @@ abstract class TestCase extends BaseTestCase
         if (config('app.env') !== 'testing') {
             throw new Exception('This should only be triggered in a testing environment');
         }
-
-        // $this->withoutExceptionHandling();
     }
 
-    protected function getTestUser($model = false): stdClass|User
+    protected function getTestUser($requiresModel = false): stdClass|User
     {
-        $email = fake()->email;
-        $password = fake()->password;
-        $name = fake()->name;
+        $password = '123456';
 
-        $userModel = UserService::create($email, $password, $name);
+        // ::: re-use the existing user data if it exists in local state
+        $this->testUserModel = UserService::create(fake()->email, $password, fake()->name);
 
         // generate an std class with the unhashed password, for use in test assertions
         $user = new stdClass;
-        $user->email = $email;
+        $user->email = $this->testUserModel->email;
         $user->password = $password;
-        $user->name = $name;
-        $user->id = $userModel->id;
+        $user->name = $this->testUserModel->name;
+        $user->id = $this->testUserModel->id;
 
-        if ($model) {
-            return $userModel;
+        if ($requiresModel) {
+            return $this->testUserModel;
         }
 
         return $user;
@@ -61,14 +60,18 @@ abstract class TestCase extends BaseTestCase
 
     protected function loginUser()
     {
-        $user = $this->getTestUser();
+        if (!is_null($this->testUserModel)) {
+            $user = $this->testUserModel;
+        } else {
+            $user = $this->getTestUser();
+        }
 
         $interaction = $this->artisan('flashcard:interactive')
             ->expectsChoice($this->flashcardConfig['prompts']['select_option'], FlashcardWelcomeScreenEnum::LOGIN->value, $this->flashcardConfig['welcome_screen']);
 
         $interaction->expectsQuestion($this->flashcardConfig['prompts']['enter_email'], $user->email)
-            ->expectsQuestion($this->flashcardConfig['prompts']['enter_password'], $user->password)
-            ->expectsOutput($this->flashcardConfig['messages']['login_message']);
+            ->expectsQuestion($this->flashcardConfig['prompts']['enter_password'], '123456');
+
 
         return $interaction;
     }

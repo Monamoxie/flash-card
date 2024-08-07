@@ -119,16 +119,11 @@ class FlashcardCommand extends Command implements Isolatable
 
             if ($validUser) {
                 $this->info($this->flashcardConfig['messages']['login_message']);
-                $this->setUser($validUser);
+                $this->user = $validUser;
                 $validCredentials = true;
             } else {
                 $this->error($this->flashcardConfig['messages']['invalid_credentials']);
             }
         }
-    }
-
-    public function setUser(User $user)
-    {
-        $this->user = $user;
     }
 }

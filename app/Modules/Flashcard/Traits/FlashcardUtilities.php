@@ -2,6 +2,7 @@
 
 namespace Modules\Flashcard\Traits;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Flashcard\Enums\FlashcardActionEnum;
 use Illuminate\Support\Facades\Validator;
@@ -149,8 +150,7 @@ trait FlashcardUtilities
                 return $this->statistics();
                 break;
             case FlashcardActionEnum::RESET->value:
-                $this->reset();
-                break;
+                return $this->reset();
             case FlashcardActionEnum::EXIT->value:
                 $this->exit();
                 $this->info('Goodbye. See you soon!');
@@ -331,8 +331,7 @@ trait FlashcardUtilities
     {
         switch (strtolower($input)) {
             case 'r':
-                $this->displayMenu();
-                break;
+                return $this->displayMenu();
             case 'n':
                 $this->currPage += 1;
                 break;
@@ -364,12 +363,10 @@ trait FlashcardUtilities
         $rowToAction = null;
         while (!$isValidRowID) {
             $input = $this->ask($this->getGenericPagination($intendedAction));
-
             if (is_numeric($input)) {
                 $rowToAction = $this->flashcards->filter(function ($row) use ($input) {
                     return $row->table_id == (int) $input;
                 })->first();
-
 
                 if (is_null($rowToAction)) {
                     $this->error('Invalid Row ID. Please try again!');
@@ -497,21 +494,19 @@ trait FlashcardUtilities
     private function reset()
     {
         while (True) {
-            $choice = $this->choice('Are you sure you wish to reset yoour progress levels?', [
+            $choice = $this->choice($this->flashcardConfig['prompts']['confirm_reset_status'], [
                 'NO', 'YES'
             ]);
             switch (strtolower($choice)) {
                 case 'no':
-                    $this->info('Your levels are intact. No changes made');
-                    $this->displayMenu();
-                    break;
+                    $this->info($this->flashcardConfig['messages']['levels_intact']);
+                    return $this->displayMenu();
                 case 'yes':
                     $this->flashcardService::resetAllStatus($this->user);
-                    $this->alert('Reset was successful!');
-                    $this->displayMenu();
-                    break;
+                    $this->alert($this->flashcardConfig['messages']['flashcards_reset']);
+                    return $this->displayMenu();
                 default:
-                    $this->error('Invalid choice. Please try again');
+                    $this->error($this->flashcardConfig['messages']['invalid_option']);
                     break;
             }
         }
@@ -519,7 +514,6 @@ trait FlashcardUtilities
 
     protected function exit()
     {
-        $this->user = null;
         $this->resetProps();
         return 0;
     }

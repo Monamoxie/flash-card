@@ -7,6 +7,7 @@ use Modules\Flashcard\Tests\TestCase;
 use Faker\Factory;
 use Modules\Flashcard\Enums\FlashcardActionEnum;
 use Modules\Flashcard\Enums\FlashcardPaginationEnum;
+use Modules\Flashcard\Enums\FlashcardStatusEnum;
 use Modules\Flashcard\Enums\FlashcardWelcomeScreenEnum;
 use Modules\Flashcard\Models\Flashcard;
 
@@ -233,7 +234,7 @@ class FlashcardCommandTest extends TestCase
         $interaction->expectsChoice(
             $this->flashcardConfig['prompts']['select_pagination'],
             FlashcardPaginationEnum::RETURN->value,
-            [FlashcardPaginationEnum::RETURN->value]
+            [FlashcardPaginationEnum::NEXT->value, FlashcardPaginationEnum::RETURN->value]
         );
 
         foreach ($flashcards as $flashcard) {
@@ -249,5 +250,134 @@ class FlashcardCommandTest extends TestCase
             FlashcardActionEnum::EXIT->value,
             $this->flashcardConfig['menu']
         )->assertExitCode(0);
+    }
+
+
+    public function test_update_flashcard()
+    {
+        $user = $this->getTestUser();
+
+        $interaction = $this->loginUser();
+
+        $flashcards = Flashcard::factory()->count(12)->create(['user_id' => $user->id]);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::UPDATE->value,
+            $this->flashcardConfig['menu']
+        );
+
+        $interaction->expectsQuestion('Press R for Return to Main Menu, N for Next,  OR enter the ID of the row you wish to Update Flashcard', 'R');
+
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::EXIT->value,
+            $this->flashcardConfig['menu']
+        )->assertExitCode(0);
+    }
+
+    public function test_delete_flashcard()
+    {
+        $user = $this->getTestUser();
+
+        $interaction = $this->loginUser();
+
+        $flashcards = Flashcard::factory()->count(12)->create(['user_id' => $user->id]);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::DELETE->value,
+            $this->flashcardConfig['menu']
+        );
+
+        $interaction->expectsQuestion('Press R for Return to Main Menu, N for Next,  OR enter the ID of the row you wish to Delete Flashcard', 'R');
+
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::EXIT->value,
+            $this->flashcardConfig['menu']
+        )->assertExitCode(0);
+    }
+
+    public function test_reset_flashcards()
+    {
+        $user = $this->getTestUser();
+
+        $interaction = $this->loginUser();
+
+        Flashcard::factory()->count(12)->create(['user_id' => $user->id]);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::RESET->value,
+            $this->flashcardConfig['menu']
+        );
+
+        $interaction->expectsQuestion($this->flashcardConfig['prompts']['confirm_reset_status'], 'no');
+
+        $interaction->expectsOutput($this->flashcardConfig['messages']['levels_intact']);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::RESET->value,
+            $this->flashcardConfig['menu']
+        );
+
+        $interaction->expectsQuestion($this->flashcardConfig['prompts']['confirm_reset_status'], 'yes');
+
+        $this->assertDatabaseHas('flashcards', [
+            'user_id' => $user->id,
+            'status' => FlashcardStatusEnum::NOT_ANSWERED->value,
+        ]);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::EXIT->value,
+            $this->flashcardConfig['menu']
+        )->assertExitCode(0);
+    }
+
+
+    public function test_statistics()
+    {
+        $user = $this->getTestUser();
+
+        $interaction = $this->loginUser();
+
+        $totalUnanswered = fake()->numberBetween(1, 10);
+        $totalCorrect = fake()->numberBetween(1, 10);
+        $totalIncorrect = fake()->numberBetween(1, 10);
+
+        $grandTotal = $totalUnanswered + $totalCorrect + $totalIncorrect;
+        $grandCompleted = $totalCorrect + $totalIncorrect;
+
+        Flashcard::factory()->count($totalUnanswered)->create([
+            'user_id' => $user->id,
+            'status' => FlashcardStatusEnum::NOT_ANSWERED->value
+        ]);
+
+        Flashcard::factory()->count($totalCorrect)->create([
+            'user_id' => $user->id,
+            'status' => FlashcardStatusEnum::CORRECT->value
+        ]);
+
+        Flashcard::factory()->count($totalIncorrect)->create([
+            'user_id' => $user->id,
+            'status' => FlashcardStatusEnum::INCORRECT->value
+        ]);
+
+        $interaction->expectsChoice(
+            $this->flashcardConfig['prompts']['select_option'],
+            FlashcardActionEnum::STATISTICS->value,
+            $this->flashcardConfig['menu']
+        );
+
+        $interaction->expectsOutputToContain("TOTAL QUESTIONS: " . $grandTotal);
+        $interaction->expectsOutputToContain("TOTAL COMPLETED: " . $grandCompleted);
+        $interaction->expectsOutputToContain("TOTAL CORRECT: " . $totalCorrect);
+
+        $interaction->assertExitCode(0);
     }
 }
