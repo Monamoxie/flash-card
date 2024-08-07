@@ -6,16 +6,16 @@
 
 # FLASH CARD
 
-A powerful CLI program for managing your flashcards. It gives you the ability to create, manage and practice flashcards. 
+A powerful command line application for managing and practicing flash cards. Written in PHP with CLI authentication capabilities, it is portable, fully dockerised and easy to setup. 
 
-## Prerequisites
-- Docker
-- PHP (>= 8.2)
-- Laravel (>= 11.0)
-- Redis
-- MySQL
-- Nginx
-- Composer
+## Tech Stack
+- PHP 8 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/php/php-original.svg" height="40" title="PHP" alt="PHP" width="25" height="10"/>
+- Docker <img src="https://techstack-generator.vercel.app/docker-icon.svg" title="docker" alt="docker" width="20" height="20"/> 
+- Laravel  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/laravel/laravel-original.svg" title="Laravel" alt="Laravel" width="20" height="20"/> 
+- Redis <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original-wordmark.svg" title="redis" alt="redis" width="20" height="20"> 
+- MySQL <img src="https://techstack-generator.vercel.app/mysql-icon.svg" title="MySQL" alt="MySQL"  width="20" height="20"/>
+- Nginx <img src="https://techstack-generator.vercel.app/nginx-icon.svg" title="nginx" alt="nginx"  width="20" height="20"/>
+
 
 ## Installation
 - Clone the repo
