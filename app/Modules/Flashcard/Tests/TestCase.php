@@ -6,16 +6,8 @@ use App\Models\User;
 use Exception;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Mockery;
-use Modules\Flashcard\Console\Commands\FlashcardCommand;
-use Modules\Flashcard\Enums\FlashcardActionEnum;
 use Modules\Flashcard\Enums\FlashcardWelcomeScreenEnum;
-use Modules\Flashcard\Models\Flashcard;
 use Modules\Flashcard\Services\UserService;
-use ReflectionClass;
 use stdClass;
 
 abstract class TestCase extends BaseTestCase
