@@ -44,7 +44,8 @@ A MySQL DB instead of the the default SQLite installation provided by Laravel ou
  <img src="resources/images/update.png">
  <img src="resources/images/practice.png">
  <img src="resources/images/test.png">
- 
+</p>
+
 ## TESTING
 ```
 php artisan test
